@@ -1,0 +1,100 @@
+{% extends "blogs/base.html" %}
+
+{% block title %}写新文章 - 我的博客{% endblock %}
+
+{% block content %}
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h1 style="margin-bottom: 2rem;">✍️ 写新文章</h1>
+        
+        <form method="post" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="{{ field.id_for_label }}" 
+                           style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333;">
+                        {{ field.label }}
+                        {% if field.field.required %}
+                            <span style="color: #e74c3c;">*</span>
+                        {% endif %}
+                    </label>
+                    
+                    {{ field }}
+                    
+                    {% if field.help_text %}
+                        <div style="margin-top: 0.25rem; font-size: 0.9rem; color: #666;">
+                            💡 {{ field.help_text }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        <div style="margin-top: 0.5rem; color: #e74c3c; font-size: 0.9rem;">
+                            ❌ {{ field.errors|striptags }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div style="display: flex; gap: 1rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #eee;">
+                <button type="submit" 
+                        style="padding: 0.75rem 2rem; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                    发布文章
+                </button>
+                <a href="{% url 'blogs:index' %}" 
+                   style="padding: 0.75rem 2rem; background: #f0f0f0; color: #666; text-decoration: none; border-radius: 4px; font-weight: 500;">
+                    取消
+                </a>
+            </div>
+        </form>
+        
+        <!-- 写作提示 -->
+        <div style="margin-top: 2rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #4CAF50;">
+            <h4 style="margin-bottom: 0.5rem; color: #2e7d32;">📝 写作提示</h4>
+            <ul style="color: #666; padding-left: 1.5rem;">
+                <li>标题应该简洁明了，能概括文章主题</li>
+                <li>内容可以使用 Markdown 语法进行排版</li>
+                <li>适当使用段落、列表和标题让文章更易读</li>
+                <li>发布前请检查是否有错别字</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 字符计数器
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleInput = document.querySelector('#id_title');
+        const textInput = document.querySelector('#id_text');
+        
+        // 字符计数器
+        if (titleInput) {
+            const counter = document.createElement('div');
+            counter.style.marginTop = '0.25rem';
+            counter.style.fontSize = '0.9rem';
+            counter.style.color = '#666';
+            titleInput.parentNode.insertBefore(counter, titleInput.nextSibling);
+            
+            function updateCounter() {
+                const remaining = 200 - titleInput.value.length;
+                counter.textContent = `剩余字数：${remaining}`;
+                counter.style.color = remaining < 20 ? '#e74c3c' : '#666';
+            }
+            
+            titleInput.addEventListener('input', updateCounter);
+            updateCounter();
+        }
+        
+        // 自动调整文本框高度
+        if (textInput) {
+            function adjustHeight() {
+                textInput.style.height = 'auto';
+                textInput.style.height = (textInput.scrollHeight) + 'px';
+            }
+            
+            textInput.addEventListener('input', adjustHeight);
+            adjustHeight();
+        }
+    });
+</script>
+{% endblock %}

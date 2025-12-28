@@ -1,0 +1,67 @@
+{% extends "blogs/base.html" %}
+
+{% block title %}{{ post.title }} - 我的博客{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- 文章标题 -->
+    <h1 style="margin-bottom: 1rem; color: #333;">
+        {{ post.title }}
+    </h1>
+
+    <!-- 文章信息 -->
+    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; color: #666; font-size: 0.95rem;">
+        <span>👤 <a href="{% url 'blogs:user_posts' post.owner.username %}"
+                  style="color: #667eea; text-decoration: none;">
+            {{ post.owner.username }}
+        </a></span>
+        <span>📅 {{ post.date_added|date:"Y年m月d日 H:i" }}</span>
+
+        {% if user == post.owner %}
+            <span style="margin-left: auto;">
+                <a href="{% url 'blogs:edit_post' post.id %}"
+                   style="padding: 0.25rem 0.75rem;
+                          background: #667eea;
+                          color: white;
+                          text-decoration: none;
+                          border-radius: 4px;
+                          font-size: 0.9rem;">
+                    编辑
+                </a>
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- 文章内容 -->
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="color: #333; line-height: 1.8; font-size: 1.05rem;">
+            {{ post.text|linebreaks }}
+        </div>
+    </div>
+
+    <!-- 返回链接 -->
+    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+        <a href="{% url 'blogs:index' %}"
+           style="color: #667eea; text-decoration: none; font-weight: 500;">
+            ← 返回文章列表
+        </a>
+    </div>
+
+    <!-- 文章统计信息 -->
+    <div style="margin-top: 3rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+        <h4 style="margin-bottom: 1rem; color: #666;">📊 文章统计</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="background: white; padding: 1rem; border-radius: 6px; text-align: center;">
+                <div style="font-size: 1.5rem; color: #667eea; margin-bottom: 0.5rem;">📝</div>
+                <div style="font-weight: 500;">{{ post.text|wordcount }}</div>
+                <div style="color: #666; font-size: 0.9rem;">字数</div>
+            </div>
+            <div style="background: white; padding: 1rem; border-radius: 6px; text-align: center;">
+                <div style="font-size: 1.5rem; color: #4CAF50; margin-bottom: 0.5rem;">📅</div>
+                <div style="font-weight: 500;">{{ post.date_added|date:"Y-m-d" }}</div>
+                <div style="color: #666; font-size: 0.9rem;">发布日期</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

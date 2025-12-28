@@ -1,0 +1,109 @@
+{% extends "blogs/base.html" %}
+
+{% block title %}登录 - 我的博客{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 0 auto;">
+    <h1 style="margin-bottom: 2rem; text-align: center;">🔐 用户登录</h1>
+    
+    {% if form.errors %}
+        <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+            <p style="margin: 0;">
+                <strong>❌ 登录失败！</strong><br>
+                用户名或密码不正确，请重试。
+            </p>
+        </div>
+    {% endif %}
+    
+    {% if next %}
+        {% if user.is_authenticated %}
+            <div style="background: #fff3cd; color: #856404; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+                <p style="margin: 0;">
+                    <strong>⚠️ 权限不足</strong><br>
+                    您的账户没有访问此页面的权限。
+                </p>
+            </div>
+        {% else %}
+            <div style="background: #d1ecf1; color: #0c5460; padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+                <p style="margin: 0;">
+                    <strong>ℹ️ 登录提示</strong><br>
+                    请先登录以访问此页面。
+                </p>
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <form method="post" action="{% url 'login' %}" 
+          style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        {% csrf_token %}
+        
+        <!-- 用户名字段 -->
+        <div style="margin-bottom: 1.5rem;">
+            <label for="id_username" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333;">
+                用户名
+            </label>
+            <input type="text" 
+                   name="username" 
+                   id="id_username" 
+                   required
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
+                   placeholder="请输入用户名"
+                   autofocus>
+        </div>
+        
+        <!-- 密码字段 -->
+        <div style="margin-bottom: 2rem;">
+            <label for="id_password" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333;">
+                密码
+            </label>
+            <input type="password" 
+                   name="password" 
+                   id="id_password" 
+                   required
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
+                   placeholder="请输入密码">
+        </div>
+        
+        <!-- 隐藏的next字段 -->
+        {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+        
+        <!-- 提交按钮 -->
+        <button type="submit" 
+                style="width: 100%; padding: 0.75rem; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background 0.3s;">
+            登录
+        </button>
+    </form>
+    
+    <!-- 注册链接 -->
+    <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #eee;">
+        <p style="color: #666; margin-bottom: 0.5rem;">
+            还没有账号？
+        </p>
+        <a href="{% url 'blogs:register' %}" 
+           style="color: #667eea; text-decoration: none; font-weight: 500;">
+            立即注册 →
+        </a>
+    </div>
+    
+    <!-- 忘记密码提示 -->
+    <div style="margin-top: 1rem; text-align: center;">
+        <small style="color: #999;">
+            （此演示项目不支持密码重置功能）
+        </small>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // 自动聚焦到用户名输入框
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('id_username');
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "blogs/base.html" %}
+
+{% block title %}{{ profile_user.username }}的文章 - 我的博客{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <!-- 用户信息 -->
+    <div style="text-align: center; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid #eee;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">👤</div>
+        <h1 style="margin-bottom: 0.5rem; color: #333;">
+            {{ profile_user.username }}
+        </h1>
+        <p style="color: #666; margin-bottom: 0.5rem;">
+            共发布了 {{ total_posts }} 篇文章
+        </p>
+        {% if user == profile_user %}
+            <p style="color: #4CAF50;">
+                👋 这是您的主页
+            </p>
+        {% endif %}
+    </div>
+    
+    <!-- 文章列表 -->
+    {% if page_obj %}
+        <h2 style="margin-bottom: 1.5rem; color: #333;">📚 所有文章</h2>
+        
+        <div style="display: grid; gap: 1.5rem;">
+            {% for post in page_obj %}
+                <article style="
+                    background: white;
+                    padding: 1.5rem;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                ">
+                    <h3 style="margin: 0 0 0.5rem 0; color: #333;">
+                        <a href="{% url 'blogs:post_detail' post.id %}" 
+                           style="color: inherit; text-decoration: none;">
+                            {{ post.title }}
+                        </a>
+                    </h3>
+                    <div style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                        发布于：{{ post.date_added|date:"Y年m月d日 H:i" }}
+                    </div>
+                    <div style="color: #444; line-height: 1.6;">
+                        {{ post.text|truncatewords:80|linebreaks }}
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <a href="{% url 'blogs:post_detail' post.id %}" 
+                           style="color: #667eea; text-decoration: none; font-weight: 500;">
+                            阅读全文 →
+                        </a>
+                        {% if user == post.owner %}
+                            <a href="{% url 'blogs:edit_post' post.id %}" 
+                               style="margin-left: 1rem; color: #666; text-decoration: none;">
+                                编辑
+                            </a>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+        
+        <!-- 分页 -->
+        {% if page_obj.has_other_pages %}
+            <div style="margin-top: 3rem; text-align: center;">
+                <div style="display: inline-flex; gap: 0.5rem; align-items: center;">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="btn">« 首页</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn">‹ 上一页</a>
+                    {% endif %}
+                    
+                    <span style="padding: 0.5rem 1rem; background: white; border-radius: 4px;">
+                        第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn">下一页 ›</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn">末页 »</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+        
+    {% else %}
+        <!-- 空状态 -->
+        <div style="text-align: center; padding: 3rem 2rem; background: #f8f9fa; border-radius: 8px;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+            <h3 style="margin-bottom: 1rem; color: #666;">还没有发布文章</h3>
+            <p style="color: #999;">
+                {% if user == profile_user %}
+                    <a href="{% url 'blogs:new_post' %}" style="color: #667eea; font-weight: 500;">
+                        开始写作您的第一篇文章 →
+                    </a>
+                {% else %}
+                    {{ profile_user.username }} 还没有发布过文章
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+    
+    <!-- 返回链接 -->
+    <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+        <a href="{% url 'blogs:index' %}" 
+           style="color: #667eea; text-decoration: none; font-weight: 500;">
+            ← 返回首页
+        </a>
+    </div>
+</div>
+{% endblock %}

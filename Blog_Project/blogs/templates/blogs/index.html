@@ -1,0 +1,133 @@
+{% extends "blogs/base.html" %}
+
+{% block title %}首页 - 我的博客{% endblock %}
+
+{% block content %}
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <h1>📚 最新博客文章</h1>
+        
+        <!-- 搜索框 -->
+        <form method="get" action="{% url 'blogs:index' %}" style="display: flex; gap: 0.5rem;">
+            <input type="text" 
+                   name="q" 
+                   value="{{ search_query }}" 
+                   placeholder="搜索文章标题、内容或作者..." 
+                   style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; min-width: 300px;">
+            <button type="submit" class="btn btn-primary">搜索</button>
+            {% if search_query %}
+                <a href="{% url 'blogs:index' %}" class="btn">清除</a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if search_query %}
+        <p style="margin-bottom: 1.5rem; color: #666;">
+            搜索 "{{ search_query }}" 的结果（{{ total_posts }} 篇文章）
+        </p>
+    {% endif %}
+
+    {% if page_obj %}
+        <!-- 文章列表 -->
+        <div style="display: grid; gap: 1.5rem;">
+            {% for post in page_obj %}
+                <article style="
+                    background: white;
+                    padding: 1.5rem;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+                    border-left: 4px solid #667eea;
+                    transition: transform 0.3s, box-shadow 0.3s;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <h2 style="margin: 0 0 0.5rem 0; color: #333;">
+                                <a href="{% url 'blogs:post_detail' post.id %}" 
+                                   style="color: inherit; text-decoration: none;">
+                                    {{ post.title }}
+                                </a>
+                            </h2>
+                            <div style="display: flex; align-items: center; gap: 1rem; color: #666; font-size: 0.9rem;">
+                                <span>👤 <a href="{% url 'blogs:user_posts' post.owner.username %}" 
+                                          style="color: #667eea; text-decoration: none;">
+                                    {{ post.owner.username }}
+                                </a></span>
+                                <span>📅 {{ post.date_added|date:"Y年m月d日 H:i" }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if user == post.owner %}
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a href="{% url 'blogs:edit_post' post.id %}" 
+                                   style="padding: 0.25rem 0.75rem; 
+                                          background: #f0f0f0; 
+                                          color: #666; 
+                                          text-decoration: none; 
+                                          border-radius: 4px; 
+                                          font-size: 0.9rem;">
+                                    编辑
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="color: #444; line-height: 1.7; margin-bottom: 1rem;">
+                        {{ post.text|truncatewords:100|linebreaks }}
+                    </div>
+                    
+                    {% if post.text|wordcount > 100 %}
+                        <a href="{% url 'blogs:post_detail' post.id %}" 
+                           style="color: #667eea; text-decoration: none; font-weight: 500;">
+                            阅读全文 →
+                        </a>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+
+        <!-- 分页 -->
+        {% if page_obj.has_other_pages %}
+            <div style="margin-top: 3rem; text-align: center;">
+                <div style="display: inline-flex; gap: 0.5rem; align-items: center;">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}" 
+                           class="btn">« 首页</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                           class="btn">‹ 上一页</a>
+                    {% endif %}
+                    
+                    <span style="padding: 0.5rem 1rem; background: white; border-radius: 4px;">
+                        第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页
+                    </span>
+                    
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                           class="btn">下一页 ›</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                           class="btn">末页 »</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <!-- 空状态 -->
+        <div style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 8px;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📝</div>
+            <h3 style="margin-bottom: 1rem; color: #666;">还没有博客文章</h3>
+            <p style="color: #999; margin-bottom: 2rem;">成为第一个发布文章的人吧！</p>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'blogs:new_post' %}" class="btn btn-primary" style="padding: 0.75rem 2rem;">
+                    开始写作
+                </a>
+            {% else %}
+                <p style="color: #999;">
+                    <a href="{% url 'login' %}" style="color: #667eea;">登录</a> 
+                    或 
+                    <a href="{% url 'blogs:register' %}" style="color: #667eea;">注册</a> 
+                    后即可发布文章
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}

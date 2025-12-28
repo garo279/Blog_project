@@ -1,0 +1,548 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}我的博客{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 头部样式 - 修改为固定在一行 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .logo:hover {
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex: 1;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-link.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .username {
+            font-weight: 500;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 0.75rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            font-family: inherit;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.4rem 0.7rem;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+
+        /* 主要内容区 */
+        .main-content {
+            padding: 2rem 0;
+            min-height: calc(100vh - 150px);
+        }
+
+        /* 消息提示 */
+        .messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-color: #bee5eb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid #eaeaea;
+            color: #666;
+            background: white;
+        }
+
+        .footer p {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* 搜索框样式 */
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+
+        .search-input {
+            padding: 0.4rem 0.75rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            min-width: 180px;
+            max-width: 200px;
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* 表单样式 */
+        form.inline-form {
+            display: inline;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 登录/注册按钮组 */
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+            font-size: 1.2rem;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        .back-to-top:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .search-input {
+                min-width: 150px;
+                max-width: 150px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .logo-area {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+
+            .search-box {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
+
+            .search-input {
+                min-width: 70%;
+                max-width: 300px;
+            }
+
+            .nav-link {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .auth-buttons .nav-link,
+            .auth-buttons .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                order: 0;
+            }
+        }
+
+        /* 移动端优化 */
+        @media (max-width: 360px) {
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 头部 -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <!-- 左侧：Logo -->
+                <div class="logo-area">
+                    <a href="{% url 'blogs:index' %}" class="logo">📝 我的博客</a>
+                </div>
+
+                <!-- 右侧：导航和用户信息 -->
+                <div class="nav-links">
+                    <!-- 搜索框（仅首页显示） -->
+                    {% if request.resolver_match.url_name == 'index' %}
+                    <form method="get" action="{% url 'blogs:index' %}" class="search-box">
+                        <input type="text"
+                               name="q"
+                               value="{{ request.GET.q|default:'' }}"
+                               placeholder="搜索文章..."
+                               class="search-input">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.4rem 0.75rem;">搜索</button>
+                    </form>
+                    {% endif %}
+
+                    <a href="{% url 'blogs:index' %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        首页
+                    </a>
+
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'blogs:new_post' %}"
+                           class="nav-link {% if request.resolver_match.url_name == 'new_post' %}active{% endif %}">
+                            写文章
+                        </a>
+                        <a href="{% url 'blogs:user_posts' user.username %}"
+                           class="nav-link {% if request.resolver_match.url_name == 'user_posts' %}active{% endif %}">
+                            我的文章
+                        </a>
+                    {% else %}
+                        <a href="{% url 'blogs:register' %}"
+                           class="nav-link {% if request.resolver_match.url_name == 'register' %}active{% endif %}">
+                            注册
+                        </a>
+                    {% endif %}
+
+                    <!-- 用户信息区 -->
+                    <div class="user-info">
+                        {% if user.is_authenticated %}
+                            <span class="username">👤 {{ user.username }}</span>
+
+                            <!-- 退出登录表单 -->
+                            <form method="post" action="{% url 'logout' %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-logout"
+                                        onclick="return confirm('确定要退出登录吗？');">
+                                    退出
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="auth-buttons">
+                                <a href="{% url 'login' %}"
+                                   class="nav-link {% if request.resolver_match.url_name == 'login' %}active{% endif %}">
+                                    登录
+                                </a>
+                                <a href="{% url 'blogs:register' %}"
+                                   class="btn btn-primary">
+                                    注册
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 消息提示 -->
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}
+            <!-- 子模板的内容会插入到这里 -->
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- 返回顶部按钮 -->
+    <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
+        ↑
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <p>© {% now "Y" %} 我的博客 - Django博客系统</p>
+            <p>使用 Django 5.2 构建 | 当前时间：{% now "Y年m月d日 H:i" %}</p>
+            <p>
+                <a href="{% url 'blogs:index' %}" style="color: #667eea; text-decoration: none;">首页</a>
+                {% if user.is_authenticated %}
+                    | <a href="{% url 'blogs:user_posts' user.username %}" style="color: #667eea; text-decoration: none;">我的文章</a>
+                {% endif %}
+            </p>
+        </div>
+    </footer>
+
+    <!-- 通用JavaScript -->
+    <script>
+        // 返回顶部按钮
+        document.addEventListener('DOMContentLoaded', function() {
+            const backToTopBtn = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+
+            // 平滑滚动到顶部
+            backToTopBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // 自动关闭消息提示
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.transition = 'opacity 0.5s';
+                    alert.style.opacity = '0';
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.parentNode.removeChild(alert);
+                        }
+                    }, 500);
+                }, 5000); // 5秒后自动消失
+            });
+
+            // 表单提交确认
+            const logoutForm = document.querySelector('form[action*="logout"]');
+            if (logoutForm) {
+                logoutForm.addEventListener('submit', function(e) {
+                    if (!confirm('确定要退出登录吗？')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // 搜索框自动聚焦（如果存在）
+            const searchInput = document.querySelector('.search-input');
+            if (searchInput && window.location.search.includes('q=')) {
+                searchInput.focus();
+                searchInput.select();
+            }
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
